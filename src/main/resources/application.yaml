@@ -1,0 +1,47 @@
+spring:
+  application:
+    name: library
+
+  datasource:
+    url: jdbc:postgresql://localhost:5435/library
+    username: admin
+    password: password
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    open-in-view: false
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: alizadekanan6@gmail.com
+    password: nfry ruif mxog ofwo
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+server:
+  servlet:
+    context-path: /v1/library
+
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: "*"
+#      base-path: /actuator
+#  endpoint:
+#    health:
+#      show-details: always
+
+
