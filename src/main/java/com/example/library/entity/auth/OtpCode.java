@@ -1,4 +1,4 @@
-package com.example.library.entity;
+package com.example.library.entity.auth;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

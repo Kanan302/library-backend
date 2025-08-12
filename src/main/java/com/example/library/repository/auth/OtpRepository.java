@@ -1,6 +1,6 @@
 package com.example.library.repository.auth;
 
-import com.example.library.entity.OtpCode;
+import com.example.library.entity.auth.OtpCode;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

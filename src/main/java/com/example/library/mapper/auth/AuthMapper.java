@@ -3,8 +3,8 @@ package com.example.library.mapper.auth;
 import com.example.library.dto.auth.request.LoginRequestDto;
 import com.example.library.dto.auth.request.RegisterRequestDto;
 import com.example.library.dto.auth.response.LoginResponseDto;
-import com.example.library.dto.user.UserDto;
-import com.example.library.entity.User;
+import com.example.library.dto.auth.response.RegisterResponseDto;
+import com.example.library.entity.user.User;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
@@ -15,5 +15,5 @@ public interface AuthMapper {
 
     User toRegisterEntity(RegisterRequestDto requestDto);
 
-    UserDto toRegisterDto(User user);
+    RegisterResponseDto toRegisterDto(User user);
 }

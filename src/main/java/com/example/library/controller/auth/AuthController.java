@@ -3,7 +3,7 @@ package com.example.library.controller.auth;
 import com.example.library.config.ApiResponse;
 import com.example.library.dto.auth.request.*;
 import com.example.library.dto.auth.response.LoginResponseDto;
-import com.example.library.dto.user.UserDto;
+import com.example.library.dto.auth.response.RegisterResponseDto;
 import com.example.library.service.auth.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,8 +37,8 @@ public class AuthController {
     }
 
     @PostMapping("/register/verify")
-    public ResponseEntity<ApiResponse<UserDto>> verifyAndRegister(@RequestBody OtpVerificationRequestDto dto) {
-        UserDto responseDto = authService.verifyAndRegister(dto);
+    public ResponseEntity<ApiResponse<RegisterResponseDto>> verifyAndRegister(@RequestBody OtpVerificationRequestDto dto) {
+        RegisterResponseDto responseDto = authService.verifyAndRegister(dto);
         return ResponseEntity.ok(new ApiResponse<>(201, "hesab yaradıldı", responseDto));
     }
 
@@ -50,8 +50,8 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password/reset")
-    public ResponseEntity<ApiResponse<UserDto>> resetPassword(@RequestBody PasswordResetRequestDto requestDto) {
-        UserDto userDto = authService.resetPassword(requestDto);
+    public ResponseEntity<ApiResponse<RegisterResponseDto>> resetPassword(@RequestBody PasswordResetRequestDto requestDto) {
+        RegisterResponseDto userDto = authService.resetPassword(requestDto);
         return ResponseEntity.ok(new ApiResponse<>(200, "Şifrə uğurla yeniləndi", userDto));
     }
 

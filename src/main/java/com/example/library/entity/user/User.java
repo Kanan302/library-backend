@@ -1,11 +1,15 @@
-package com.example.library.entity;
+package com.example.library.entity.user;
 
+import com.example.library.entity.books.Books;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -23,4 +27,12 @@ public class User {
     private String email;
 
     private String password;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_books",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "books_id")
+    )
+    private List<Books> readBooks = new ArrayList<>();
 }

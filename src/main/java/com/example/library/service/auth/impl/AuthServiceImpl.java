@@ -5,17 +5,15 @@ import com.example.library.dto.auth.request.OtpVerificationRequestDto;
 import com.example.library.dto.auth.request.PasswordResetRequestDto;
 import com.example.library.dto.auth.request.RegisterRequestDto;
 import com.example.library.dto.auth.response.LoginResponseDto;
-import com.example.library.dto.user.UserDto;
-import com.example.library.entity.OtpCode;
-import com.example.library.entity.User;
+import com.example.library.dto.auth.response.RegisterResponseDto;
+import com.example.library.entity.auth.OtpCode;
+import com.example.library.entity.user.User;
 import com.example.library.exception.AlreadyExistsException;
 import com.example.library.exception.NotFoundException;
 import com.example.library.exception.WrongPasswordException;
 import com.example.library.mapper.auth.AuthMapper;
-import com.example.library.mapper.user.UserMapper;
 import com.example.library.repository.auth.AuthRepository;
 import com.example.library.repository.auth.OtpRepository;
-import com.example.library.repository.user.UserRepository;
 import com.example.library.service.auth.AuthService;
 import com.example.library.service.auth.EmailService;
 import com.example.library.utils.JwtUtil;
@@ -24,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Random;
 
 @Service
@@ -34,7 +33,6 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtil jwtUtil;
     private final EmailService emailService;
     private final OtpRepository otpRepository;
-    private final UserMapper userMapper;
 
 
     public AuthServiceImpl(
@@ -43,16 +41,14 @@ public class AuthServiceImpl implements AuthService {
             PasswordEncoder passwordEncoder,
             JwtUtil jwtUtil,
             EmailService emailService,
-            OtpRepository otpRepository,
-            UserMapper userMapper
-            ) {
+            OtpRepository otpRepository
+    ) {
         this.authRepository = authRepository;
         this.authMapper = authMapper;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.emailService = emailService;
         this.otpRepository = otpRepository;
-        this.userMapper = userMapper;
     }
 
     @Override
@@ -75,19 +71,6 @@ public class AuthServiceImpl implements AuthService {
         return loginResponseDto;
     }
 
-//    @Override
-//    public RegisterResponseDto register(RegisterRequestDto registerRequestDto) {
-//        if (authRepository.findByEmail(registerRequestDto.getEmail()).isPresent()) {
-//            throw new AlreadyExistsException("Email artıq mövcuddur.");
-//        }
-//
-//        User user = authMapper.toRegisterEntity(registerRequestDto);
-//        user.setPassword(passwordEncoder.encode(registerRequestDto.getPassword()));
-//
-//        user = authRepository.save(user);
-//        return authMapper.toRegisterDto(user);
-//    }
-
     @Transactional
     @Override
     public void requestOtp(RegisterRequestDto registerRequestDto) {
@@ -108,7 +91,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Transactional
     @Override
-    public UserDto verifyAndRegister(OtpVerificationRequestDto dto) {
+    public RegisterResponseDto verifyAndRegister(OtpVerificationRequestDto dto) {
         OtpCode otpCode = otpRepository.findByEmailAndCode(dto.getEmail(), dto.getOtpCode())
                 .filter(o -> o.getExpirationTime().isAfter(LocalDateTime.now()))
                 .orElseThrow(() -> new NotFoundException("OTP kod yalnışdır və ya vaxtı bitmişdir."));
@@ -116,6 +99,7 @@ public class AuthServiceImpl implements AuthService {
         User user = new User();
         user.setEmail(dto.getEmail());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setReadBooks(List.of());
 
         user = authRepository.save(user);
         otpRepository.delete(otpCode);
@@ -142,7 +126,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public UserDto resetPassword(PasswordResetRequestDto requestDto) {
+    public RegisterResponseDto resetPassword(PasswordResetRequestDto requestDto) {
         OtpCode otpCode = otpRepository.findByEmailAndCode(requestDto.getEmail(), requestDto.getOtpCode())
                 .filter(o -> o.getExpirationTime().isAfter(LocalDateTime.now()))
                 .orElseThrow(() -> new NotFoundException("OTP kod yalnışdır və ya vaxtı bitmişdir."));
@@ -154,7 +138,7 @@ public class AuthServiceImpl implements AuthService {
         authRepository.save(user);
         otpRepository.delete(otpCode);
 
-        return userMapper.toDto(user);
+        return authMapper.toRegisterDto(user);
     }
 
 }

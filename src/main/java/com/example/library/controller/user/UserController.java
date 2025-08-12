@@ -16,6 +16,7 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
+
     @GetMapping()
     public ResponseEntity<ApiResponse<List<UserDto>>> getAllUsers() {
         List<UserDto> responseDto = userService.getUsers();
@@ -32,5 +33,11 @@ public class UserController {
     public ResponseEntity<ApiResponse<String>> delete(@PathVariable("id") Long id) {
         userService.deleteUserById(id);
         return ResponseEntity.ok(new ApiResponse<>(200, "hesab silindi", null));
+    }
+
+    @PostMapping("/{userId}/read-books/{bookId}")
+    public ResponseEntity<ApiResponse<Void>> markBookAsReadByUser(@PathVariable Long userId, @PathVariable Long bookId) {
+        userService.markBookAsReadByUser(userId, bookId);
+        return ResponseEntity.ok(new ApiResponse<>(200, "kitab oxundu", null));
     }
 }
