@@ -2,11 +2,13 @@ package com.example.library.controller.books;
 
 import com.example.library.config.ApiResponse;
 import com.example.library.dto.books.request.BooksRequestDto;
+import com.example.library.dto.books.request.PlannedReadDateRequestDto;
 import com.example.library.dto.books.response.BooksResponseDto;
 import com.example.library.service.books.BooksService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -40,6 +42,15 @@ public class BooksController {
     public ResponseEntity<ApiResponse<String>> deleteBookById(@PathVariable Long id) {
         booksService.deleteBookById(id);
         return ResponseEntity.ok(new ApiResponse<>(200, "kitab silindi", null));
+    }
+
+    @PostMapping("/{bookId}/user/{userId}/set-read-date")
+    public ResponseEntity<ApiResponse<BooksResponseDto>> setReadDate(@PathVariable Long bookId, @PathVariable Long userId, @RequestBody PlannedReadDateRequestDto request) {
+
+        LocalDate plannedReadDate = LocalDate.parse(request.getPlannedReadDate());
+        BooksResponseDto response = booksService.setReadDate(bookId, userId, plannedReadDate);
+
+        return ResponseEntity.ok(new ApiResponse<>(200, "Tarix qeyd olundu", response));
     }
 
 }

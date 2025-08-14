@@ -5,6 +5,7 @@ package com.example.library.service.books;
 import com.example.library.dto.books.request.BooksRequestDto;
 import com.example.library.dto.books.response.BooksResponseDto;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface BooksService {
@@ -12,4 +13,5 @@ public interface BooksService {
     BooksResponseDto getBookById(Long id);
     List<BooksResponseDto> getAllBooks();
     void deleteBookById(Long id);
+    BooksResponseDto setReadDate(Long bookId, Long userId, LocalDate plannedReadDate);
 }
