@@ -90,7 +90,6 @@ public class BooksServiceImpl implements BooksService {
     public void deleteBookById(Long id) {
         booksRepository.deleteById(id);
     }
-
     @Override
     public BooksResponseDto setReadDate(Long bookId, Long userId, LocalDate plannedReadDate) {
         Books book = booksRepository.findById(bookId)
@@ -99,10 +98,14 @@ public class BooksServiceImpl implements BooksService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User tapılmadı"));
 
-        // Əgər user readBooks-da yoxdursa əlavə et
-        if (!book.getReaders().contains(user)) {
+
+        boolean alreadyAdded = book.getReaders()
+                .stream()
+                .anyMatch(u -> u.getId().equals(userId));
+
+        if (!alreadyAdded) {
             book.getReaders().add(user);
-            user.getReadBooks().add(book); // bi-directional listi də update edirik
+            user.getReadBooks().add(book);
             userRepository.save(user);
         }
 
@@ -111,5 +114,6 @@ public class BooksServiceImpl implements BooksService {
 
         return booksMapper.toDto(savedBook);
     }
+
 
 }
