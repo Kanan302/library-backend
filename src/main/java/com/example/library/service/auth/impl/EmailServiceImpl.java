@@ -42,7 +42,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    @Scheduled(cron = "0 0 9 * * ?")
+    @Scheduled(cron = "0 0 12 * * ?")
     public void sendReadDateReminders() {
         LocalDate today = LocalDate.now();
         List<Books> booksToRemind = booksRepository.findByReadDate(today);
