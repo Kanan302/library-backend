@@ -14,7 +14,9 @@ import com.example.library.repository.category.CategoryRepository;
 import com.example.library.repository.user.UserRepository;
 import com.example.library.service.books.BooksService;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -41,29 +43,37 @@ public class BooksServiceImpl implements BooksService {
     }
 
     @Override
-    public BooksResponseDto createBook(BooksRequestDto booksRequestDto) {
+    public BooksResponseDto createBook(BooksRequestDto booksRequestDto, MultipartFile imageFile) {
+        List<Books> existingBooks = booksRepository.findByTitle(booksRequestDto.getTitle());
+        if (!existingBooks.isEmpty()) {
+            throw new RuntimeException("Kitab '" + booksRequestDto.getTitle() + "' artıq mövcuddur");
+        }
+
         Author author = authorRepository.findById(booksRequestDto.getAuthorId())
                 .orElseThrow(() -> new NotFoundException("Author tapılmadı"));
 
         Category category = categoryRepository.findById(booksRequestDto.getCategoryId())
                 .orElseThrow(() -> new NotFoundException("Category tapılmadı"));
-//
-//        User user = userRepository.findById(booksRequestDto.getUserId())
-//                .orElseThrow(() -> new NotFoundException("User tapılmadı"));
 
-        // Əgər author-un categories siyahısında category yoxdursa, əlavə et
         if (!author.getCategories().contains(category)) {
             author.getCategories().add(category);
             authorRepository.save(author);
         }
 
-        // Əgər category-in author siyahısında author yoxdursa, əlavə et
         if (!category.getAuthors().contains(author)) {
             category.getAuthors().add(author);
             categoryRepository.save(category);
         }
 
+        String base64Image;
+        try {
+            base64Image = java.util.Base64.getEncoder().encodeToString(imageFile.getBytes());
+        } catch (IOException e) {
+            throw new RuntimeException("Fayl Base64-a çevrilmədi", e);
+        }
+
         Books book = booksMapper.toEntity(booksRequestDto, author, category);
+        book.setImageBase64(base64Image);
         book.setReaders(List.of());
 
         Books savedBook = booksRepository.save(book);
@@ -90,6 +100,7 @@ public class BooksServiceImpl implements BooksService {
     public void deleteBookById(Long id) {
         booksRepository.deleteById(id);
     }
+
     @Override
     public BooksResponseDto setReadDate(Long bookId, Long userId, LocalDate plannedReadDate) {
         Books book = booksRepository.findById(bookId)
@@ -113,6 +124,48 @@ public class BooksServiceImpl implements BooksService {
         Books savedBook = booksRepository.save(book);
 
         return booksMapper.toDto(savedBook);
+    }
+
+    @Override
+    public BooksResponseDto updateBookById(Long bookId, BooksRequestDto booksRequestDto, MultipartFile imageFile) {
+        Books book = booksRepository.findById(bookId)
+                .orElseThrow(() -> new NotFoundException("Kitab tapılmadı"));
+
+        if (booksRequestDto.getTitle() != null) {
+            book.setTitle(booksRequestDto.getTitle());
+        }
+
+        if (booksRequestDto.getAuthorId() != null) {
+            Author author = authorRepository.findById(booksRequestDto.getAuthorId())
+                    .orElseThrow(() -> new NotFoundException("Author tapılmadı"));
+            book.setAuthor(author);
+        }
+
+        if (booksRequestDto.getCategoryId() != null) {
+            Category category = categoryRepository.findById(booksRequestDto.getCategoryId())
+                    .orElseThrow(() -> new NotFoundException("Category tapılmadı"));
+            book.setCategory(category);
+        }
+
+        if (booksRequestDto.getReadDate() != null) {
+            book.setReadDate(booksRequestDto.getReadDate());
+        }
+
+        if (booksRequestDto.getReview() != null) {
+            book.setReview(booksRequestDto.getReview());
+        }
+
+        if (imageFile != null && !imageFile.isEmpty()) {
+            try {
+                String base64Image = java.util.Base64.getEncoder().encodeToString(imageFile.getBytes());
+                book.setImageBase64(base64Image);
+            } catch (IOException e) {
+                throw new RuntimeException("Fayl Base64-a çevrilmədi", e);
+            }
+        }
+
+        Books updatedBook = booksRepository.save(book);
+        return booksMapper.toDto(updatedBook);
     }
 
 

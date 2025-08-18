@@ -41,4 +41,13 @@ public class AuthorController {
         authorService.deleteAuthorById(id);
         return ResponseEntity.ok(new ApiResponse<>(200, "yazici silindi", null));
     }
+
+    @PutMapping("/{id}/edit")
+    public ResponseEntity<ApiResponse<AuthorResponseDto>> updateAuthorById(
+            @PathVariable Long id,
+            @RequestBody AuthorRequestDto authorRequestDto) {
+
+        AuthorResponseDto updatedCategory = authorService.updateAuthorById(id, authorRequestDto);
+        return ResponseEntity.ok(new ApiResponse<>(200, "kateqoriya yeniləndi", updatedCategory));
+    }
 }

@@ -4,6 +4,7 @@ import com.example.library.dto.author.request.AuthorRequestDto;
 import com.example.library.dto.author.response.AuthorResponseDto;
 import com.example.library.entity.author.Author;
 import com.example.library.entity.category.Category;
+import com.example.library.exception.AlreadyExistsException;
 import com.example.library.exception.NotFoundException;
 import com.example.library.mapper.author.AuthorMapper;
 import com.example.library.repository.author.AuthorRepository;
@@ -27,6 +28,11 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     public AuthorResponseDto createAuthor(AuthorRequestDto authorRequestDto) {
+        List<Author> existingAuthors = authorRepository.findAllByName(authorRequestDto.getName());
+        if (!existingAuthors.isEmpty()) {
+            throw new AlreadyExistsException("Yazici '" + authorRequestDto.getName() + "' artıq mövcuddur");
+        }
+
         Author author = authorMapper.toEntity(authorRequestDto);
 
         if (authorRequestDto.getCategoryIds() != null && !authorRequestDto.getCategoryIds().isEmpty()) {
@@ -54,5 +60,23 @@ public class AuthorServiceImpl implements AuthorService {
     @Override
     public void deleteAuthorById(Long id) {
         authorRepository.deleteById(id);
+    }
+
+    @Override
+    public AuthorResponseDto updateAuthorById(Long id, AuthorRequestDto authorRequestDto) {
+        Author author = authorRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Yazici tapılmadı: " + id));
+
+        if (authorRequestDto.getName() != null && !authorRequestDto.getName().isBlank()) {
+            author.setName(authorRequestDto.getName());
+        }
+
+        if (authorRequestDto.getCategoryIds() != null && !authorRequestDto.getCategoryIds().isEmpty()) {
+            List<Category> categories = categoryRepository.findAllById(authorRequestDto.getCategoryIds());
+            author.setCategories(categories);
+        }
+
+        Author updated = authorRepository.save(author);
+        return authorMapper.toDto(updated);
     }
 }

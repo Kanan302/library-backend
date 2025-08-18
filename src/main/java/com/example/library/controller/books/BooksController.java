@@ -5,9 +5,13 @@ import com.example.library.dto.books.request.BooksRequestDto;
 import com.example.library.dto.books.request.PlannedReadDateRequestDto;
 import com.example.library.dto.books.response.BooksResponseDto;
 import com.example.library.service.books.BooksService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -32,9 +36,16 @@ public class BooksController {
         return ResponseEntity.ok(new ApiResponse<>(200, "kitab getirildi", bookDto));
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<ApiResponse<BooksResponseDto>> createBook(@RequestBody BooksRequestDto booksRequestDto) {
-        BooksResponseDto createdBookDto = booksService.createBook(booksRequestDto);
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<BooksResponseDto>> createBook(
+            @RequestPart("book") String bookJson,
+            @RequestPart("image") MultipartFile imageFile
+    ) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.findAndRegisterModules();
+        BooksRequestDto booksRequestDto = objectMapper.readValue(bookJson, BooksRequestDto.class);
+
+        BooksResponseDto createdBookDto = booksService.createBook(booksRequestDto, imageFile);
         return ResponseEntity.ok(new ApiResponse<>(200, "kitab yaradildi", createdBookDto));
     }
 
@@ -53,4 +64,17 @@ public class BooksController {
         return ResponseEntity.ok(new ApiResponse<>(200, "Tarix qeyd olundu", response));
     }
 
+    @PutMapping(value = "/{id}/edit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<BooksResponseDto>> updateBookById(
+            @PathVariable Long id,
+            @RequestPart("book") String bookJson,
+            @RequestPart(value = "image", required = false) MultipartFile imageFile
+    ) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.findAndRegisterModules();
+        BooksRequestDto booksRequestDto = objectMapper.readValue(bookJson, BooksRequestDto.class);
+
+        BooksResponseDto updatedBook = booksService.updateBookById(id, booksRequestDto, imageFile);
+        return ResponseEntity.ok(new ApiResponse<>(200, "Kitab yeniləndi", updatedBook));
+    }
 }

@@ -20,7 +20,7 @@ public class BooksResponseDto {
 
     private String title;
 
-    private String imageUrl;
+    private String imageBase64;
 
     private LocalDate readDate;
 

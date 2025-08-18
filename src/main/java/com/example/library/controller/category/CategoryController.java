@@ -41,4 +41,14 @@ public class CategoryController {
         categoryService.deleteCategoryById(id);
         return ResponseEntity.ok(new ApiResponse<>(200, "kateqoriya silindi", null));
     }
+
+    @PutMapping("/{id}/edit")
+    public ResponseEntity<ApiResponse<CategoryResponseDto>> updateCategoryById(
+            @PathVariable Long id,
+            @RequestBody CategoryRequestDto categoryRequestDto) {
+
+        CategoryResponseDto updatedCategory = categoryService.updateCategoryById(id, categoryRequestDto);
+        return ResponseEntity.ok(new ApiResponse<>(200, "kateqoriya yeniləndi", updatedCategory));
+    }
+
 }

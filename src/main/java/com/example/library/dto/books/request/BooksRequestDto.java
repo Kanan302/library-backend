@@ -14,8 +14,6 @@ import java.time.LocalDate;
 public class BooksRequestDto {
     private String title;
 
-    private String imageUrl;
-
     private Long authorId;
 
     private Long categoryId;

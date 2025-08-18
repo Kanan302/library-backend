@@ -7,8 +7,8 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.util.List;
 
-
 @Repository
 public interface BooksRepository extends JpaRepository<Books, Long> {
     List<Books> findByReadDate(LocalDate readDate);
+    List<Books> findByTitle(String title);
 }

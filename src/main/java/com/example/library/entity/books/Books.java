@@ -27,7 +27,8 @@ public class Books {
 
     private String title;
 
-    private String imageUrl;
+    @Lob
+    private String imageBase64;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "author_id")
