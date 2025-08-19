@@ -17,7 +17,7 @@ import com.example.library.repository.auth.OtpRepository;
 import com.example.library.service.auth.AuthService;
 import com.example.library.service.auth.EmailService;
 import com.example.library.utils.JwtUtil;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -78,6 +78,12 @@ public class AuthServiceImpl implements AuthService {
             throw new AlreadyExistsException("Email artıq mövcuddur.");
         }
 
+        User user = new User();
+        user.setEmail(registerRequestDto.getEmail());
+        user.setPassword(passwordEncoder.encode(registerRequestDto.getPassword()));
+        user.setReadBooks(List.of());
+        authRepository.save(user);
+
         String otp = String.valueOf(new Random().nextInt(89999) + 10000);
         OtpCode otpCode = new OtpCode();
         otpCode.setEmail(registerRequestDto.getEmail());
@@ -92,21 +98,21 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     @Override
     public RegisterResponseDto verifyAndRegister(OtpVerificationRequestDto dto) {
-        OtpCode otpCode = otpRepository.findByEmailAndCode(dto.getEmail(), dto.getOtpCode())
+        OtpCode otpCode = otpRepository.findByCode(dto.getOtpCode())
                 .filter(o -> o.getExpirationTime().isAfter(LocalDateTime.now()))
                 .orElseThrow(() -> new NotFoundException("OTP kod yalnışdır və ya vaxtı bitmişdir."));
 
-        User user = new User();
-        user.setEmail(dto.getEmail());
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setReadBooks(List.of());
+        String email = otpCode.getEmail();
 
-        user = authRepository.save(user);
-        otpRepository.delete(otpCode);
+        User user = authRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("İstifadəçi tapılmadı."));
+
+        otpRepository.deleteByEmail(otpCode.getEmail());
 
         return authMapper.toRegisterDto(user);
     }
 
+    @Transactional
     @Override
     public void requestPasswordResetOtp(String email) {
         if (authRepository.findByEmail(email).isEmpty()) {
@@ -125,21 +131,29 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    @Transactional
-    public RegisterResponseDto resetPassword(PasswordResetRequestDto requestDto) {
-        OtpCode otpCode = otpRepository.findByEmailAndCode(requestDto.getEmail(), requestDto.getOtpCode())
+    public void verifyPasswordResetOtp(OtpVerificationRequestDto dto) {
+        otpRepository.findByCode(dto.getOtpCode())
                 .filter(o -> o.getExpirationTime().isAfter(LocalDateTime.now()))
                 .orElseThrow(() -> new NotFoundException("OTP kod yalnışdır və ya vaxtı bitmişdir."));
+    }
 
-        User user = authRepository.findByEmail(requestDto.getEmail())
+    @Transactional
+    @Override
+    public RegisterResponseDto resetPassword(PasswordResetRequestDto requestDto) {
+        OtpCode otpCode = otpRepository.findTopByOrderByExpirationTimeDesc()
+                .orElseThrow(() -> new NotFoundException("Doğrulama tapılmadı."));
+
+        String email = otpCode.getEmail();
+
+        User user = authRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("İstifadəçi tapılmadı."));
 
         user.setPassword(passwordEncoder.encode(requestDto.getNewPassword()));
         authRepository.save(user);
-        otpRepository.delete(otpCode);
+
+        otpRepository.deleteById(otpCode.getId());
 
         return authMapper.toRegisterDto(user);
     }
-
 }
 

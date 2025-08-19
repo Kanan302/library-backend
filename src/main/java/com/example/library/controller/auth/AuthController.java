@@ -24,12 +24,6 @@ public class AuthController {
         return ResponseEntity.ok(new ApiResponse<>(200, "ugurla giris oldu", loginResponseDto));
     }
 
-//    @PostMapping("/register")
-//    public ResponseEntity<ApiResponse<RegisterResponseDto>> register(@RequestBody RegisterRequestDto registerRequestDto) {
-//        RegisterResponseDto registerResponseDto = authService.register(registerRequestDto);
-//        return ResponseEntity.ok(new ApiResponse<>(201, "hesab yaradildi", registerResponseDto));
-//    }
-
     @PostMapping("/register/request-otp")
     public ResponseEntity<ApiResponse<String>> requestOtp(@RequestBody RegisterRequestDto registerRequestDto) {
         authService.requestOtp(registerRequestDto);
@@ -49,10 +43,15 @@ public class AuthController {
         return ResponseEntity.ok(new ApiResponse<>(200, "OTP kod göndərildi", null));
     }
 
-    @PostMapping("/forgot-password/reset")
-    public ResponseEntity<ApiResponse<RegisterResponseDto>> resetPassword(@RequestBody PasswordResetRequestDto requestDto) {
-        RegisterResponseDto userDto = authService.resetPassword(requestDto);
-        return ResponseEntity.ok(new ApiResponse<>(200, "Şifrə uğurla yeniləndi", userDto));
+    @PostMapping("/forgot-password/verify-otp")
+    public ResponseEntity<ApiResponse<String>> verifyPasswordResetOtp(@RequestBody OtpVerificationRequestDto dto) {
+        authService.verifyPasswordResetOtp(dto);
+        return ResponseEntity.ok(new ApiResponse<>(200, "OTP təsdiqləndi", null));
     }
 
+    @PostMapping("/forgot-password/reset")
+    public ResponseEntity<ApiResponse<RegisterResponseDto>> resetPassword(@RequestBody PasswordResetRequestDto dto) {
+        RegisterResponseDto response = authService.resetPassword(dto);
+        return ResponseEntity.ok(new ApiResponse<>(200, "Şifrə uğurla yeniləndi", response));
+    }
 }

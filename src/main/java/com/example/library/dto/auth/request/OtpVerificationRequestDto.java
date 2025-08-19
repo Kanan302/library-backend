@@ -10,9 +10,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OtpVerificationRequestDto {
-    private String email;
-
-    private String password;
-
     private String otpCode;
 }

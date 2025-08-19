@@ -12,10 +12,12 @@ public interface AuthService {
     LoginResponseDto login(LoginRequestDto loginRequestDto);
 
     void requestOtp(RegisterRequestDto registerRequestDto);
+
     RegisterResponseDto verifyAndRegister(OtpVerificationRequestDto dto);
 
     void requestPasswordResetOtp(String email);
-    RegisterResponseDto resetPassword(PasswordResetRequestDto requestDto);
 
-//    RegisterResponseDto register(RegisterRequestDto registerRequestDto);
+    void verifyPasswordResetOtp(OtpVerificationRequestDto dto);
+
+    RegisterResponseDto resetPassword(PasswordResetRequestDto requestDto);
 }
