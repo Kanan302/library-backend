@@ -36,7 +36,6 @@ public class AuthController {
         return ResponseEntity.ok(new ApiResponse<>(201, "Hesab yaradıldı", responseDto));
     }
 
-
     @PostMapping("/forgot-password/request-otp")
     public ResponseEntity<ApiResponse<String>> requestPasswordResetOtp(@RequestBody EmailRequestDto emailRequestDto) {
         authService.requestPasswordResetOtp(emailRequestDto.getEmail());
