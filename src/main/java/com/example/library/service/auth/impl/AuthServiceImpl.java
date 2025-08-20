@@ -74,24 +74,20 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     @Override
     public void requestOtp(RegisterRequestDto registerRequestDto) {
-        if (authRepository.findByEmail(registerRequestDto.getEmail()).isPresent()) {
-            throw new AlreadyExistsException("Email artıq mövcuddur.");
-        }
-
-        User user = new User();
-        user.setEmail(registerRequestDto.getEmail());
-        user.setPassword(passwordEncoder.encode(registerRequestDto.getPassword()));
-        user.setReadBooks(List.of());
-        authRepository.save(user);
-
+        // OTP kodu yaradılır
         String otp = String.valueOf(new Random().nextInt(89999) + 10000);
+
         OtpCode otpCode = new OtpCode();
         otpCode.setEmail(registerRequestDto.getEmail());
         otpCode.setCode(otp);
         otpCode.setExpirationTime(LocalDateTime.now().plusMinutes(1));
+        otpCode.setPassword(passwordEncoder.encode(registerRequestDto.getPassword()));
 
+        // Əvvəlki OTP varsa sil
         otpRepository.deleteByEmail(registerRequestDto.getEmail());
         otpRepository.save(otpCode);
+
+        // Email göndər
         emailService.sendOtpEmail(registerRequestDto.getEmail(), otp);
     }
 
@@ -104,12 +100,20 @@ public class AuthServiceImpl implements AuthService {
 
         String email = otpCode.getEmail();
 
-        User user = authRepository.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("İstifadəçi tapılmadı."));
+        if (authRepository.findByEmail(email).isPresent()) {
+            throw new AlreadyExistsException("Bu email ilə hesab artıq mövcuddur.");
+        }
 
-        otpRepository.deleteByEmail(otpCode.getEmail());
+        // Burada istifadəçi yaranır
+        User newUser = new User();
+        newUser.setEmail(email);
+        newUser.setPassword(otpCode.getPassword());
+        newUser.setReadBooks(List.of());
+        User savedUser = authRepository.save(newUser);
 
-        return authMapper.toRegisterDto(user);
+        otpRepository.deleteByEmail(email);
+
+        return authMapper.toRegisterDto(savedUser);
     }
 
     @Transactional

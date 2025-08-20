@@ -21,19 +21,19 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponseDto>> login(@RequestBody LoginRequestDto loginRequestDto) {
         LoginResponseDto loginResponseDto = authService.login(loginRequestDto);
-        return ResponseEntity.ok(new ApiResponse<>(200, "ugurla giris oldu", loginResponseDto));
+        return ResponseEntity.ok(new ApiResponse<>(200, "Ugurla giriş oldu", loginResponseDto));
     }
 
     @PostMapping("/register/request-otp")
     public ResponseEntity<ApiResponse<String>> requestOtp(@RequestBody RegisterRequestDto registerRequestDto) {
         authService.requestOtp(registerRequestDto);
-        return ResponseEntity.ok(new ApiResponse<>(200, "OTP kod emailə göndərildi", "otp sent"));
+        return ResponseEntity.ok(new ApiResponse<>(200, "OTP kod emailə göndərildi", null));
     }
 
     @PostMapping("/register/verify")
     public ResponseEntity<ApiResponse<RegisterResponseDto>> verifyAndRegister(@RequestBody OtpVerificationRequestDto dto) {
         RegisterResponseDto responseDto = authService.verifyAndRegister(dto);
-        return ResponseEntity.ok(new ApiResponse<>(201, "hesab yaradıldı", responseDto));
+        return ResponseEntity.ok(new ApiResponse<>(201, "Hesab yaradıldı", responseDto));
     }
 
 

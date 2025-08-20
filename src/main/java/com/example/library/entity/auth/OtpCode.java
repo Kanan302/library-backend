@@ -24,4 +24,6 @@ public class OtpCode {
     private String code;
 
     private LocalDateTime expirationTime;
+
+    private String password;
 }
