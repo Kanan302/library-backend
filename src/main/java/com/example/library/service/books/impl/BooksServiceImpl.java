@@ -14,6 +14,7 @@ import com.example.library.repository.category.CategoryRepository;
 import com.example.library.repository.user.UserRepository;
 import com.example.library.service.books.BooksService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -96,10 +97,25 @@ public class BooksServiceImpl implements BooksService {
                 .toList();
     }
 
+
+    @Transactional
     @Override
     public void deleteBookById(Long id) {
-        booksRepository.deleteById(id);
+        Books book = booksRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Kitab tapılmadı"));
+
+        // Əlaqəni yalnız User tərəfində silmək
+        for (User user : book.getReaders()) {
+            user.getReadBooks().remove(book);
+        }
+
+        // Readers-i də təmizləyirik (sinxron qalmaq üçün)
+        book.getReaders().clear();
+
+        // Əlaqələr artıq silindi, indi kitabı silmək olar
+        booksRepository.delete(book);
     }
+
 
     @Override
     public BooksResponseDto setReadDate(Long bookId, Long userId, LocalDate plannedReadDate) {
@@ -125,6 +141,7 @@ public class BooksServiceImpl implements BooksService {
 
         return booksMapper.toDto(savedBook);
     }
+
 
     @Override
     public BooksResponseDto updateBookById(Long bookId, BooksRequestDto booksRequestDto, MultipartFile imageFile) {
@@ -167,6 +184,5 @@ public class BooksServiceImpl implements BooksService {
         Books updatedBook = booksRepository.save(book);
         return booksMapper.toDto(updatedBook);
     }
-
 
 }

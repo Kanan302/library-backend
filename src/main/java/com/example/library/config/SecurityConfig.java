@@ -18,21 +18,30 @@ public class SecurityConfig {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
+//    @Bean
+//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//        return http
+//                .csrf(AbstractHttpConfigurer::disable)
+//                .authorizeHttpRequests(auth -> auth
+//                                .requestMatchers(
+//                                        "/auth/**",                 // Auth endpointlər açıq olsun
+//                                        "/v3/api-docs/**",          // Swagger docs
+//                                        "/swagger-ui/**",
+//                                        "/swagger-ui.html"          // Swagger UI
+//                                ).permitAll()
+//                                .anyRequest().authenticated()
+//                )
+//                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+//                .build();
+//    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                                .requestMatchers(
-//                                "/api/login",
-                                        "/auth/**",            // Auth endpointlər açıq olsun
-                                        "/v3/api-docs/**",         // Swagger docs
-                                        "/swagger-ui/**",
-                                        "/swagger-ui.html"         // Swagger UI
-                                ).permitAll()
-                                .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

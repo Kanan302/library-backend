@@ -29,6 +29,7 @@ public class User {
     private String password;
 
     @ManyToMany(fetch = FetchType.EAGER)
+//    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinTable(
             name = "user_books",
             joinColumns = @JoinColumn(name = "user_id"),

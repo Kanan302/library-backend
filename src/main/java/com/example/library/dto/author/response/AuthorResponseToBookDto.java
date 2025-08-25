@@ -14,4 +14,9 @@ public class AuthorResponseToBookDto {
     private Long id;
 
     private String name;
+
+    private String imageBase64;
+
+    private String review;
+
 }

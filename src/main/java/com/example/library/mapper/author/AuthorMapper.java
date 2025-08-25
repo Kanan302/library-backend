@@ -16,8 +16,10 @@ import java.util.List;
 public interface AuthorMapper {
 
     @Mapping(target = "categories", source = "categories")
+    @Mapping(source = "imageBase64", target = "imageBase64")
     AuthorResponseDto toDto(Author author);
 
+    @Mapping(target = "imageBase64", ignore = true)
     Author toEntity(AuthorRequestDto authorDto);
 
     List<CategoryResponseToAuthorDto> mapCategories(List<Category> categories);

@@ -13,4 +13,9 @@ public class AuthorResponseToCategoryDto {
     private Long id;
 
     private String name;
+
+    private String imageBase64;
+
+    private String review;
+
 }

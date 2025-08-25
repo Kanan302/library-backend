@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -13,4 +15,10 @@ public class BookResponseToAuthorDto {
     private Long id;
 
     private String title;
+
+    private String imageBase64;
+
+    private LocalDate readDate;
+
+    private String review;
 }

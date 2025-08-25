@@ -4,9 +4,13 @@ import com.example.library.config.ApiResponse;
 import com.example.library.dto.author.request.AuthorRequestDto;
 import com.example.library.dto.author.response.AuthorResponseDto;
 import com.example.library.service.author.AuthorService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -30,11 +34,19 @@ public class AuthorController {
         return ResponseEntity.ok(new ApiResponse<>(200, "yazici getirildi", authorResponseDto));
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<ApiResponse<AuthorResponseDto>> createAuthor(@RequestBody AuthorRequestDto authorRequestDto) {
-        AuthorResponseDto authorResponseDto = authorService.createAuthor(authorRequestDto);
-        return ResponseEntity.ok(new ApiResponse<>(200, "yazici yaradildi", authorResponseDto));
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<AuthorResponseDto>> createAuthor(
+            @RequestPart("author") String authorJson,
+            @RequestPart("image") MultipartFile imageFile) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.findAndRegisterModules();
+
+        AuthorRequestDto authorRequestDto = objectMapper.readValue(authorJson, AuthorRequestDto.class);
+
+        AuthorResponseDto authorResponseDto = authorService.createAuthor(authorRequestDto, imageFile);
+        return ResponseEntity.ok(new ApiResponse<>(200, "Yazıçı yaradıldı", authorResponseDto));
     }
+
 
     @DeleteMapping("/{id}/delete")
     public ResponseEntity<ApiResponse<String>> deleteAuthorById(@PathVariable Long id) {
@@ -42,12 +54,19 @@ public class AuthorController {
         return ResponseEntity.ok(new ApiResponse<>(200, "yazici silindi", null));
     }
 
-    @PutMapping("/{id}/edit")
+    @PutMapping(value = "/{id}/edit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<AuthorResponseDto>> updateAuthorById(
             @PathVariable Long id,
-            @RequestBody AuthorRequestDto authorRequestDto) {
+            @RequestPart("author") String authorJson,
+            @RequestPart(value = "image", required = false) MultipartFile imageFile
+    )
+            throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.findAndRegisterModules();
 
-        AuthorResponseDto updatedCategory = authorService.updateAuthorById(id, authorRequestDto);
+        AuthorRequestDto authorRequestDto = objectMapper.readValue(authorJson, AuthorRequestDto.class);
+
+        AuthorResponseDto updatedCategory = authorService.updateAuthorById(id, authorRequestDto, imageFile);
         return ResponseEntity.ok(new ApiResponse<>(200, "kateqoriya yeniləndi", updatedCategory));
     }
 }

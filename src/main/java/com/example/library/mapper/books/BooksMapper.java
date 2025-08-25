@@ -28,6 +28,8 @@ public interface BooksMapper {
     @Mapping(target = "category", source = "category")
     @Mapping(target = "readers", ignore = true)
     @Mapping(target = "imageBase64", ignore = true)
+    @Mapping(target = "review", source = "dto.review")
+    @Mapping(target = "readDate", source = "dto.readDate")
     Books toEntity(BooksRequestDto dto, Author author, Category category);
 
     AuthorResponseToBookDto mapAuthors(Author author);

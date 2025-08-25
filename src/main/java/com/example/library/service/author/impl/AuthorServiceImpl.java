@@ -11,7 +11,10 @@ import com.example.library.repository.author.AuthorRepository;
 import com.example.library.repository.category.CategoryRepository;
 import com.example.library.service.author.AuthorService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -27,13 +30,21 @@ public class AuthorServiceImpl implements AuthorService {
     }
 
     @Override
-    public AuthorResponseDto createAuthor(AuthorRequestDto authorRequestDto) {
+    public AuthorResponseDto createAuthor(AuthorRequestDto authorRequestDto, MultipartFile imageFile) {
         List<Author> existingAuthors = authorRepository.findAllByName(authorRequestDto.getName());
         if (!existingAuthors.isEmpty()) {
             throw new AlreadyExistsException("Yazici '" + authorRequestDto.getName() + "' artıq mövcuddur");
         }
 
+        String base64Image;
+        try {
+            base64Image = java.util.Base64.getEncoder().encodeToString(imageFile.getBytes());
+        } catch (IOException e) {
+            throw new RuntimeException("Fayl Base64-a çevrilmədi", e);
+        }
+
         Author author = authorMapper.toEntity(authorRequestDto);
+        author.setImageBase64(base64Image);
 
         if (authorRequestDto.getCategoryIds() != null && !authorRequestDto.getCategoryIds().isEmpty()) {
             List<Category> categories = categoryRepository.findAllById(authorRequestDto.getCategoryIds());
@@ -62,8 +73,9 @@ public class AuthorServiceImpl implements AuthorService {
         authorRepository.deleteById(id);
     }
 
+    @Transactional
     @Override
-    public AuthorResponseDto updateAuthorById(Long id, AuthorRequestDto authorRequestDto) {
+    public AuthorResponseDto updateAuthorById(Long id, AuthorRequestDto authorRequestDto, MultipartFile imageFile) {
         Author author = authorRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Yazici tapılmadı: " + id));
 
@@ -71,12 +83,25 @@ public class AuthorServiceImpl implements AuthorService {
             author.setName(authorRequestDto.getName());
         }
 
+        if (authorRequestDto.getReview() != null) {
+            author.setReview(authorRequestDto.getReview());
+        }
+
         if (authorRequestDto.getCategoryIds() != null && !authorRequestDto.getCategoryIds().isEmpty()) {
             List<Category> categories = categoryRepository.findAllById(authorRequestDto.getCategoryIds());
             author.setCategories(categories);
         }
 
-        Author updated = authorRepository.save(author);
-        return authorMapper.toDto(updated);
+        if (imageFile != null && !imageFile.isEmpty()) {
+            try {
+                String base64Image = java.util.Base64.getEncoder().encodeToString(imageFile.getBytes());
+                author.setImageBase64(base64Image);
+            } catch (IOException e) {
+                throw new RuntimeException("Fayl Base64-a çevrilmədi", e);
+            }
+        }
+
+        Author updatedAuthor = authorRepository.save(author);
+        return authorMapper.toDto(updatedAuthor);
     }
 }

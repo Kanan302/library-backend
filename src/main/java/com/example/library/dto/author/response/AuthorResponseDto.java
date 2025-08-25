@@ -18,6 +18,10 @@ public class AuthorResponseDto {
 
     private String name;
 
+    private String imageBase64;
+
+    private String review;
+
     private List<CategoryResponseToAuthorDto> categories;
 
     private List<BookResponseToAuthorDto> books;

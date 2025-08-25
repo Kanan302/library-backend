@@ -14,6 +14,8 @@ import java.util.List;
 public class AuthorRequestDto {
     private String name;
 
+    private String review;
+
     private List<Long> categoryIds;
 
     private List<Long> bookIds;

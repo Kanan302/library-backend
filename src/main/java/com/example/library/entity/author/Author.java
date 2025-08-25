@@ -24,6 +24,11 @@ public class Author {
     @Column(unique = true)
     private String name;
 
+    @Lob
+    private String imageBase64;
+
+    private String review;
+
     @OneToMany(mappedBy = "author", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Books> books;
 
